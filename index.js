@@ -4,7 +4,7 @@ function basicCellrenderer(params) {
     return params.value;
 }
 
-function waterfallCellRenderer(
+function WaterfallCellRenderer(
     params,
     config
 ) {
@@ -19,11 +19,11 @@ function waterfallCellRenderer(
     let runningSum = null;
     let min = 0;
     let max = 0;
-   
     try {
-        min = params.context.runningSum[params.node.level].min;
-        max = params.context.runningSum[params.node.level].max;
-        runningSum = params.context.runningSum[params.node.level].sum[rowNumber - 1];
+        let runningObj = params.context.runningSum[params.node.level][params.column.colId];
+        min = runningObj.min;
+        max = runningObj.max;
+        runningSum = runningObj.sum[rowNumber - 1];
     } catch (error) {
         console.warn("An error occurred: ", error);
         console.log(params.context.runningSum, params.node.level);
@@ -56,6 +56,5 @@ function waterfallCellRenderer(
 }
 
 module.exports = {
-    basicCellrenderer: basicCellrenderer,
-    waterfallCellRenderer: waterfallCellRenderer
+    WaterfallCellRenderer: WaterfallCellRenderer
 };

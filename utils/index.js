@@ -22,6 +22,7 @@ function getRanges(params) {
 
 function getRunningSum(params) {
     // get the running sum and store in array for each level
+    let valueColumns = params.columnApi.getValueColumns().map((col) => col.getColId());
     let runningSum = {};
     params.api.forEachNodeAfterFilterAndSort((node) => {
         let data = node.data;
@@ -29,17 +30,23 @@ function getRunningSum(params) {
         if (typeof data === "undefined") {
             data = node.aggData;
         }
-        if (typeof runningSum[lvl] === "undefined") {
-            runningSum[lvl] = {
-                sum: [data.price],
-                max: [data.price],
-                min: [data.price]
-            };
-        } else {
-            runningSum[lvl].sum.push(runningSum[lvl].sum[runningSum[lvl].sum.length - 1] + data.price);
-            runningSum[lvl].max = Math.max(...runningSum[lvl].sum);
-            runningSum[lvl].min = Math.min(...runningSum[lvl].sum);
-        }
+        valueColumns.forEach((valueColumn) => {
+            if (typeof runningSum[lvl] === "undefined") {
+                runningSum[lvl] = {
+                    [valueColumn]: { 
+                        sum: [data[valueColumn]],
+                        max: data[valueColumn],
+                        min: data[valueColumn]
+                    }
+                }
+            } else {
+                let target = runningSum[lvl][valueColumn];
+                target.sum.push(target.sum[target.sum.length - 1] + data[valueColumn]);
+                target.max = Math.max(...target.sum);
+                target.min = Math.min(...target.sum);
+            }
+        });
+
     });
     return runningSum;
 }
@@ -78,12 +85,12 @@ function waterfallHelper(
         .attr("y", (30 - 30) / 2)
         .attr("width", Math.abs(width))
         .attr("height", 40)
-        .attr("fill", value > 0 ? positiveColor: negativeColor);
+        .attr("fill", value > 0 ? positiveColor : negativeColor);
 
     return chartDiv.node();
 }
 module.exports = {
-    getRanges: getRanges,
+    // getRanges: getRanges,
     getRunningSum: getRunningSum,
     waterfallHelper: waterfallHelper
 }

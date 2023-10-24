@@ -1,12 +1,13 @@
 import { getRunningSum } from "../utils";
-function setupRenderers(gridOptions, params) {
+function setupRenderers(gridOptions, params, config) {
     gridOptions.context = {
         runningSum: getRunningSum(params),
     };
-    params.api.redrawRows();
-    params.api.refreshHeader();
+    if (!config?.noRefresh) {
+        params.api.redrawRows();
+        params.api.refreshHeader();
+    }
+
 }
 
-module.exports = {
-    setupRenderers: setupRenderers
-};
+export {setupRenderers};

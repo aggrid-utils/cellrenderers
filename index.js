@@ -9,6 +9,7 @@ function WaterfallCellRenderer(
     config
 ) {
     if(params.node.level === -1) return params.value;
+    let dataSource = config?.dataSource? config.dataSource : params.context.runningSum;
     let nodeId = params.node.id.split("-");
     let rowNumber = Number(nodeId[nodeId.length - 1]);
     let columnWidth = params.column.actualWidth;
@@ -20,13 +21,13 @@ function WaterfallCellRenderer(
     let min = 0;
     let max = 0;
     try {
-        let runningObj = params.context.runningSum[params.node.level][params.column.colId];
+        let runningObj = dataSource[params.node.level][params.column.colId];
         min = runningObj.min;
         max = runningObj.max;
         runningSum = runningObj.sum[rowNumber - 1];
     } catch (error) {
         console.warn("An error occurred: ", error);
-        console.log(params.context.runningSum, params.node.level);
+        console.log(dataSource, params.node.level);
     }
     let domain = [0, max];
     if (config?.axisType === "atomic") {
@@ -55,6 +56,4 @@ function WaterfallCellRenderer(
     });
 }
 
-module.exports = {
-    WaterfallCellRenderer: WaterfallCellRenderer
-};
+export { WaterfallCellRenderer};

@@ -20,9 +20,9 @@ function getRanges(params) {
     return levelOrderMinMax;
 }
 
-function getRunningSum(params) {
+function getRunningSum(params, config) {
     // get the running sum and store in array for each level
-    let valueColumns = params.columnApi.getValueColumns().map((col) => col.getColId());
+    let valueColumns = config?.valueColumns ? config.valueColumns : params.columnApi.getValueColumns().map((col) => col.getColId());
     let runningSum = {};
     params.api.forEachNodeAfterFilterAndSort((node) => {
         let data = node.data;
@@ -32,13 +32,14 @@ function getRunningSum(params) {
         }
         valueColumns.forEach((valueColumn) => {
             if (typeof runningSum[lvl] === "undefined") {
-                runningSum[lvl] = {
-                    [valueColumn]: { 
-                        sum: [data[valueColumn]],
-                        max: data[valueColumn],
-                        min: data[valueColumn]
-                    }
-                }
+                runningSum[lvl] = {};
+            }
+            if (typeof runningSum[lvl][valueColumn] === "undefined") {
+                runningSum[lvl][valueColumn] = {
+                    sum: [data[valueColumn]],
+                    max: data[valueColumn],
+                    min: data[valueColumn]
+                };
             } else {
                 let target = runningSum[lvl][valueColumn];
                 target.sum.push(target.sum[target.sum.length - 1] + data[valueColumn]);
@@ -63,7 +64,6 @@ function waterfallHelper(
         value
     }
 ) {
-    // if (typeof runningSum === "undefined") return;
     let offset = 0;
     let chartWidth = scale === "log" ? d3.scaleLog() : d3.scaleLinear();
     chartWidth.domain(domains);
@@ -79,7 +79,6 @@ function waterfallHelper(
     const svg = chartDiv.append("svg")
         .attr("width", columnWidth)
         .attr("height", 40);
-    // console.log(`domains: ${domains}, range: ${range}, runningSum: ${runningSum}, width: ${width}, value: ${value} offset: ${offset}`);
     const chart = svg.append("rect")
         .attr("x", offset)
         .attr("y", (30 - 30) / 2)
@@ -89,8 +88,4 @@ function waterfallHelper(
 
     return chartDiv.node();
 }
-module.exports = {
-    // getRanges: getRanges,
-    getRunningSum: getRunningSum,
-    waterfallHelper: waterfallHelper
-}
+export { getRunningSum, waterfallHelper}
